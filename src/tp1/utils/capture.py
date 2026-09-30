@@ -1,6 +1,9 @@
+from scapy.layers.inet import ICMP
 from scapy.sendrecv import sniff
-from src.tp1.utils.lib import choose_interface
+from tp1.utils.lib import choose_interface
 from tp1.utils.config import logger
+from collections import Counter
+from scapy.all import TCP,UDP,ARP
 
 
 
@@ -9,6 +12,7 @@ class Capture:
         self.interface = choose_interface()
         self.packets =[]
         self.summary = ""
+        self.protocols = Counter() #attribut
 
     def capture_traffic(self) -> None:
         """
@@ -29,7 +33,18 @@ class Capture:
         """
         Return all protocols captured with total packets number
         """
-        return ""
+        protocols = Counter()
+        for pkt in self.packets: #Parcours des paquets
+            if pkt.haslayer(TCP):
+                protocols["TCP"] += 1 #Compte chaque paquet tcp
+            if pkt.haslayer(UDP):
+                protocols["UDP"] += 1
+            if pkt.haslayer(ARP):
+                protocols["ARP"] += 1
+            if pkt.haslayer(ICMP):
+                protocols["ICMP"] += 1
+        self.protocols = protocols #liste des paquets dans protocols
+        return protocols
 
     def analyse(self, protocols: str) -> None:
         """
