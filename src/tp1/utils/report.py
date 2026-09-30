@@ -1,3 +1,6 @@
+import pygal
+from fpdf import FPDF
+
 class Report:
     def __init__(self, protocols: dict, filename: str):
         self.protocols = protocols
@@ -19,19 +22,34 @@ class Report:
 
     def save(self, filename: str) -> None:
         """
-        Save report in a file
+        Save report in a PDF file
         """
-        final_content = self.concat_report()
-        with open(self.filename, "w") as report:
-            report.write(final_content)
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Helvetica", size=16)
+        pdf.cell(0, 10, self.title, new_x="LMARGIN", new_y="NEXT")
+
+        pdf.set_font("Helvetica", size=12)
+        pdf.ln(5)
+        for ligne in self.array.split("\n"):
+            pdf.cell(0, 8, ligne, new_x="LMARGIN", new_y="NEXT")
+
+        pdf.ln(5)
+        pdf.cell(0, 8, self.graph, new_x="LMARGIN", new_y="NEXT")
+
+        pdf.output(self.filename)
 
     def generate(self, param: str) -> None:
         """
         Generate graph and array
         """
         if param == "graph":
-            graph = ""
-            self.graph = graph
+            bar_chart = pygal.Bar()
+            bar_chart.title = "Protocoles captures"
+            for protocole, nombre in self.protocols.items():
+                bar_chart.add(protocole, nombre)
+            bar_chart.render_to_file("protocols.svg")
+            self.graph = "Graphique genere : protocols.svg\n"
         elif param == "array":
             array = "Protocole      | Nombre de paquets\n"
             array += "---------------|------------------\n"

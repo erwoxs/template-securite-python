@@ -6,7 +6,9 @@ def main():
 
     report = Report(fake_protocols, "report.pdf")
     report.generate("array")
-    print(report.array)
+    report.generate("graph")
+    report.save("report.pdf")
+    print("Rapport PDF genere : report.pdf")
 
 
 if __name__ == "__main__":
