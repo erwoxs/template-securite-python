@@ -1,13 +1,16 @@
+import json
 import pygal
 from fpdf import FPDF
 
 class Report:
-    def __init__(self, protocols: dict, filename: str):
+    def __init__(self, protocols: dict, filename: str, attacks: list = None, flag: str = ""):
         self.protocols = protocols
         self.filename = filename
         self.title = "Rapport d'analyse reseau - TP1"
         self.array = ""
         self.graph = ""
+        self.attacks = attacks or []
+        self.flag = flag
 
     def concat_report(self) -> str:
         """
@@ -38,6 +41,18 @@ class Report:
         pdf.cell(0, 8, self.graph, new_x="LMARGIN", new_y="NEXT")
 
         pdf.output(self.filename)
+
+    def save_json(self, filename: str) -> None:
+        """
+        Save report data in a JSON file for auto-grading
+        """
+        data = {
+            "protocols": self.protocols,
+            "attacks": self.attacks,
+            "flag": self.flag,
+        }
+        with open(filename, "w") as f:
+            json.dump(data, f, indent=2)
 
     def generate(self, param: str) -> None:
         """
