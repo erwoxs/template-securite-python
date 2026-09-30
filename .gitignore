@@ -9,3 +9,9 @@ __pycache__/
 report.pdf
 app.log
 .env
+*.pcap
+samples/
+protocols.svg
+report.pdf
+report.json
+*.svg

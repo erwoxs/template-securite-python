@@ -1,21 +1,18 @@
-from tp1.utils.capture import Capture
-from tp1.utils.config import logger
 from tp1.utils.report import Report
 
 
 def main():
-    logger.info("Starting TP1")
+    fake_protocols = {"TCP": 128, "ARP": 12, "DNS": 7, "ICMP": 4}
+    fake_attacks = [{"type": "port_scan", "attacker": "192.168.106.66"}]
+    fake_flag = "ESGI{fake_pour_tester}"
 
-    capture = Capture()
-    capture.capture_traffic()
-    capture.analyse("tcp")
-    summary = capture.get_summary()
-
-    filename = "report.pdf"
-    report = Report(capture, filename, summary)
-    report.generate("graph")
+    report = Report(fake_protocols, "report.pdf", fake_attacks, fake_flag)
     report.generate("array")
-    report.save(filename)
+    report.generate("graph")
+    report.save("report.pdf")
+    report.save_json("report.json")
+    print("Rapport PDF genere : report.pdf")
+    print("Rapport JSON genere : report.json")
 
 
 if __name__ == "__main__":
