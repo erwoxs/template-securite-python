@@ -1,12 +1,8 @@
-from tp1.utils.capture import Capture
-
-
 class Report:
-    def __init__(self, capture: Capture, filename: str, summary: str):
-        self.capture = capture
+    def __init__(self, protocols: dict, filename: str):
+        self.protocols = protocols
         self.filename = filename
-        self.title = "TITRE DU RAPPORT"
-        self.summary = summary
+        self.title = "Rapport d'analyse reseau - TP1"
         self.array = ""
         self.graph = ""
 
@@ -16,7 +12,6 @@ class Report:
         """
         content = ""
         content += self.title
-        content += self.summary
         content += self.array
         content += self.graph
 
@@ -25,8 +20,6 @@ class Report:
     def save(self, filename: str) -> None:
         """
         Save report in a file
-        :param filename:
-        :return:
         """
         final_content = self.concat_report()
         with open(self.filename, "w") as report:
@@ -37,10 +30,11 @@ class Report:
         Generate graph and array
         """
         if param == "graph":
-            # TODO: generate graph
             graph = ""
             self.graph = graph
         elif param == "array":
-            # TODO: generate array
-            array = ""
+            array = "Protocole      | Nombre de paquets\n"
+            array += "---------------|------------------\n"
+            for protocole, nombre in self.protocols.items():
+                array += f"{protocole:<15}| {nombre}\n"
             self.array = array
