@@ -17,7 +17,8 @@ def main():
     protocols = capture.get_all_protocols()
 
     report = Report(protocols, "report.pdf")
-    report.generate("array")report.save_json("report.json")
+    report.generate("array")
+    report.save_json("report.json")
     report.generate("graph")
     report.save("report.pdf")
     report.save_json(args.out) #sortie du json
