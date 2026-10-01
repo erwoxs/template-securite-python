@@ -3,7 +3,8 @@ from scapy.sendrecv import sniff
 from tp1.utils.lib import choose_interface
 from tp1.utils.config import logger
 from collections import Counter
-from scapy.all import TCP,UDP,ARP
+from scapy.all import TCP,UDP,ARP, Ether, IP
+from scapy.layers import  DNS
 
 
 
@@ -31,24 +32,32 @@ class Capture:
 
     def sort_network_protocols(self) -> str:
         """
-        Sort and return all captured network protocols
+
         """
         return ""
 
     def get_all_protocols(self) -> str:
         """
-        Return all protocols captured with total packets number
+        Retourne nombre de paquets par protocoles
         """
         protocols = Counter()
-        for pkt in self.packets: #Parcours des paquets
-            if pkt.haslayer(TCP):
-                protocols["TCP"] += 1 #Compte chaque paquet tcp
-            if pkt.haslayer(UDP):
-                protocols["UDP"] += 1
+        for pkt in self.packets:
+            if pkt.haslayer(Ether):
+                protocols["ETHERNET"] += 1
             if pkt.haslayer(ARP):
                 protocols["ARP"] += 1
+            if pkt.haslayer(IP):
+                protocols["IP"] += 1
+            if pkt.haslayer(TCP):
+                protocols["TCP"] += 1
+                if pkt[TCP].dport == 80 or pkt[TCP].sport == 80: #Compte paquets http src et dst
+                    protocols["HTTP"] += 1
+            if pkt.haslayer(UDP):
+                protocols["UDP"] += 1
             if pkt.haslayer(ICMP):
                 protocols["ICMP"] += 1
+            if pkt.haslayer(DNS):
+                protocols["DNS"] += 1
         self.protocols = protocols #liste des paquets dans protocols
         logger.info(f"Captured protocols: {protocols}")
         return protocols
