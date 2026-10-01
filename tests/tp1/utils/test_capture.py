@@ -1,7 +1,9 @@
 from typing import Counter
 from unittest.mock import patch
 from tp1.utils.capture import Capture
-from scapy.all import IP, TCP, UDP, ARP, Ether
+from scapy.all import TCP,UDP,ARP, Ether, IP
+from scapy.layers.dns import  DNS
+from scapy.layers.inet import ICMP
 
 
 def test_capture_init():
@@ -39,18 +41,25 @@ def test_sort_network_protocols():
 def test_get_all_protocols():
     # Given
     capture = Capture()
-    capture.packets = [ #Crée des paquets
-    IP() / TCP(),
-    IP() / TCP(),
-    IP() / UDP(),
-    Ether() / ARP(),
+    capture.packets = [ #Crée des pacquets fictifs
+        Ether() / IP() / TCP(dport=80),
+        Ether() / IP() / TCP(dport=443),
+        Ether() / IP() / UDP() / DNS(),
+        Ether() / IP() / ICMP(),
+        Ether() / ARP(),
     ]
     # When
     result = capture.get_all_protocols() #Test de la fonction get_all_protocol
     # Then
-    assert result["TCP"]==2  #Valeurs des tests
-    assert result["UDP"]==1
-    assert result["ARP"]==1
+    assert result["ETHERNET"] == 5
+    assert result["IP"] == 4 #résultats attendu du nbre de paquet ip
+    assert result["TCP"] == 2 #résultat attendu du nbre de paquets tcp
+    assert result["HTTP"] == 1
+    assert result["UDP"] == 1
+    assert result["DNS"] == 1
+    assert result["ICMP"] == 1
+    assert result["ARP"] == 1
+
 
 def test_analyse():
     # Given
