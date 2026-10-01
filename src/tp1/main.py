@@ -1,13 +1,11 @@
 from tp1.utils.capture import Capture
 from tp1.utils.report import Report
 
-
 def main():
- 
+
     capture = Capture()
     capture.capture_traffic()
     protocols = capture.get_all_protocols()   # ses vraies données !
-
 
     report = Report(protocols, "report.pdf")
     report.generate("array")
@@ -16,7 +14,6 @@ def main():
     report.save_json("report.json")
     print("Rapport PDF genere : report.pdf")
     print("Rapport JSON genere : report.json")
-
 
 if __name__ == "__main__":
     main()
