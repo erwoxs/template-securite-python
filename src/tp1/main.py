@@ -3,12 +3,12 @@ from tp1.utils.report import Report
 
 
 def main():
-    # 1. La capture de ton binôme
+ 
     capture = Capture()
     capture.capture_traffic()
     protocols = capture.get_all_protocols()   # ses vraies données !
 
-    # 2. Ton rapport, branché sur SES protocoles
+
     report = Report(protocols, "report.pdf")
     report.generate("array")
     report.generate("graph")
