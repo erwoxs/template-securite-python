@@ -12,6 +12,7 @@ class Capture:
         self.interface = choose_interface()
         self.packets =[]
         self.summary = ""
+        #self.interface = "wlp0s20f3"
         self.protocols = Counter() #attribut
 
     def capture_traffic(self) -> None:
@@ -44,6 +45,7 @@ class Capture:
             if pkt.haslayer(ICMP):
                 protocols["ICMP"] += 1
         self.protocols = protocols #liste des paquets dans protocols
+        logger.info(f"Captured protocols: {protocols}")
         return protocols
 
     def analyse(self, protocols: str) -> None:
