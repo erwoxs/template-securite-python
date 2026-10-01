@@ -1,21 +1,27 @@
+import argparse #parse les arguments
 from tp1.utils.capture import Capture
+from tp1.utils.config import logger
 from tp1.utils.report import Report
 
 
 def main():
-    # 1. La capture de ton binôme
-    capture = Capture()
-    capture.capture_traffic()
-    protocols = capture.get_all_protocols()   # ses vraies données !
+    logger.info("Starting TP1")
 
-    # 2. Ton rapport, branché sur SES protocoles
+    parser = argparse.ArgumentParser() #lit les arguments
+    parser.add_argument("-f", "--file", help="Fichier pcap a analyser") #-f pour le fichier a scan
+    args = parser.parse_args() #stocke le fichier comme argument
+    capture = Capture()
+    capture.capture_traffic(pcap=args.file)
+    protocols = capture.get_all_protocols()
+
     report = Report(protocols, "report.pdf")
     report.generate("array")
     report.generate("graph")
     report.save("report.pdf")
     report.save_json("report.json")
-    print("Rapport PDF genere : report.pdf")
-    print("Rapport JSON genere : report.json")
+
+    logger.info("Rapport PDF genere : report.pdf")
+    logger.info("Rapport JSON genere : report.json")
 
 
 if __name__ == "__main__":
