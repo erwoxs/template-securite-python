@@ -15,5 +15,5 @@ def choose_interface() -> str:
 
     :return: network interface
     """
-    interface = ""
-    return interface
+    interface = conf.iface
+    return str (interface)
