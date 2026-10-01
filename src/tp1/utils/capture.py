@@ -4,7 +4,7 @@ from tp1.utils.lib import choose_interface
 from tp1.utils.config import logger
 from collections import Counter
 from scapy.all import TCP,UDP,ARP, Ether, IP
-from scapy.layers import  DNS
+from scapy.layers.dns import  DNS
 
 
 
