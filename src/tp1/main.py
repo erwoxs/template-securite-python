@@ -1,12 +1,15 @@
+from tp1.utils.capture import Capture
 from tp1.utils.report import Report
 
 
 def main():
-    fake_protocols = {"TCP": 128, "ARP": 12, "DNS": 7, "ICMP": 4}
-    fake_attacks = [{"type": "port_scan", "attacker": "192.168.106.66"}]
-    fake_flag = "ESGI{fake_pour_tester}"
+    # 1. La capture de ton binôme
+    capture = Capture()
+    capture.capture_traffic()
+    protocols = capture.get_all_protocols()   # ses vraies données !
 
-    report = Report(fake_protocols, "report.pdf", fake_attacks, fake_flag)
+    # 2. Ton rapport, branché sur SES protocoles
+    report = Report(protocols, "report.pdf")
     report.generate("array")
     report.generate("graph")
     report.save("report.pdf")
