@@ -13,15 +13,20 @@ class Capture:
         self.packets =[]
         self.summary = ""
         #self.interface = "wlp0s20f3"
-        self.protocols = Counter() #attribut
+        self.protocols = Counter() #Attribut
 
-    def capture_traffic(self) -> None:
+    def capture_traffic(self,pcap=None) -> None:
         """
-        Capture network traffic from an interface
+        Capture le traffic sur une interface ou sur un pcap
         """
-        interface = self.interface
-        logger.info(f"Capture traffic from interface {interface}")
-        self.packets = sniff(iface=self.interface, timeout=30)
+
+        if pcap:
+            logger.info(f"Lecture du fichier {pcap}")
+            self.packets = sniff(offline=pcap)
+        else:
+            interface = self.interface
+            logger.info(f"Capture traffic from interface {interface}")
+            self.packets = sniff(iface=self.interface, timeout=30)
 
 
     def sort_network_protocols(self) -> str:
