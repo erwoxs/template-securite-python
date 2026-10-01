@@ -12,9 +12,10 @@ def test_when_hello_world_then_return_hello_world():
     assert result == string
 
 
-def test_when_choose_interface_then_return_empty_string():
+def test_when_choose_interface_then_return_a_string():
     # When
     result = choose_interface()
 
     # Then
-    assert result == ""
+    assert isinstance(result, str)
+    assert result !=  ""
