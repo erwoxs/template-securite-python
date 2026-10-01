@@ -1,14 +1,16 @@
+from typing import Counter
 from unittest.mock import patch
-from src.tp1.utils.capture import Capture
+from tp1.utils.capture import Capture
+from scapy.all import IP, TCP, UDP, ARP, Ether
 
 
 def test_capture_init():
     # When
     capture = Capture()
-
-    # Then
-    assert capture.interface == ""
+    assert capture.interface != "" #Test si interface nest pas vide
+    assert capture.packets == []
     assert capture.summary == ""
+    assert capture.protocols == Counter()
 
 
 def test_given_capture_when_capture_traffic_then_interface_is_set():
@@ -37,13 +39,18 @@ def test_sort_network_protocols():
 def test_get_all_protocols():
     # Given
     capture = Capture()
-
+    capture.packets = [ #Crée des paquets
+    IP() / TCP(),
+    IP() / TCP(),
+    IP() / UDP(),
+    Ether() / ARP(),
+    ]
     # When
-    result = capture.get_all_protocols()
-
+    result = capture.get_all_protocols() #Test de la fonction get_all_protocol
     # Then
-    assert result == ""  # Method currently returns None
-
+    assert result["TCP"]==2  #Valeurs des tests
+    assert result["UDP"]==1
+    assert result["ARP"]==1
 
 def test_analyse():
     # Given
