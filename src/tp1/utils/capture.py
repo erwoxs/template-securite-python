@@ -29,12 +29,11 @@ class Capture:
             logger.info(f"Capture traffic from interface {interface}")
             self.packets = sniff(iface=self.interface, timeout=30)
 
-
-    def sort_network_protocols(self) -> str:
+    def sort_network_protocols(self) -> list:
         """
-
+        Trie par quantité le nombre de protocoles dans le traffic
         """
-        return ""
+        return self.protocols.most_common()
 
     def get_all_protocols(self) -> str:
         """
