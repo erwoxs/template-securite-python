@@ -3,30 +3,30 @@ from scapy.sendrecv import sniff
 from tp1.utils.lib import choose_interface
 from tp1.utils.config import logger
 from collections import Counter
-from scapy.all import TCP,UDP,ARP, Ether, IP
-from scapy.layers.dns import  DNS
-
+from scapy.all import TCP, UDP, ARP, Ether, IP, Raw
+from scapy.layers.dns import DNS
+from urllib.parse import unquote_plus
+import re
 
 
 class Capture:
     def __init__(self) -> None:
         self.interface = choose_interface()
-        self.packets =[]
+        self.packets = []
         self.summary = ""
-        #self.interface = "wlp0s20f3"
-        self.protocols = Counter() #Attribut
+        self.protocols = Counter()
+        self.attacks = []
+        self.flag = None
 
-    def capture_traffic(self,pcap=None) -> None:
+    def capture_traffic(self, pcap=None) -> None:
         """
         Capture le traffic sur une interface ou sur un pcap
         """
-
         if pcap:
             logger.info(f"Lecture du fichier {pcap}")
             self.packets = sniff(offline=pcap)
         else:
-            interface = self.interface
-            logger.info(f"Capture traffic from interface {interface}")
+            logger.info(f"Capture traffic from interface {self.interface}")
             self.packets = sniff(iface=self.interface, timeout=30)
 
     def sort_network_protocols(self) -> list:
@@ -35,7 +35,7 @@ class Capture:
         """
         return self.protocols.most_common()
 
-    def get_all_protocols(self) -> str:
+    def get_all_protocols(self) -> Counter:
         """
         Retourne nombre de paquets par protocoles
         """
@@ -49,7 +49,7 @@ class Capture:
                 protocols["IP"] += 1
             if pkt.haslayer(TCP):
                 protocols["TCP"] += 1
-                if pkt[TCP].dport == 80 or pkt[TCP].sport == 80: #Compte paquets http src et dst
+                if pkt[TCP].dport == 80 or pkt[TCP].sport == 80:
                     protocols["HTTP"] += 1
             if pkt.haslayer(UDP):
                 protocols["UDP"] += 1
@@ -57,39 +57,84 @@ class Capture:
                 protocols["ICMP"] += 1
             if pkt.haslayer(DNS):
                 protocols["DNS"] += 1
-        self.protocols = protocols #liste des paquets dans protocols
-        logger.info(f"Captured protocols: {protocols}")
+        self.protocols = protocols
+        logger.info(f"Protocoles capturés: {protocols}")
         return protocols
 
-    def analyse(self, protocols: str) -> None:
-        """
-        Analyse all captured data and return statement
-        Si un tra c est illégitime (exemple : Injection SQL, ARP
-        Spoo ng, etc)
-        a Noter la tentative d'attaque.
-        b Relever le protocole ainsi que l'adresse réseau/physique
-        de l'attaquant.
-        c (FACULTATIF) Opérer le blocage de la machine
-        attaquante.
-        Sinon a cher que tout va bien
-        """
-        all_protocols = self.get_all_protocols()
-        sort = self.sort_network_protocols()
-        logger.debug(f"All protocols: {all_protocols}")
-        logger.debug(f"Sorted protocols: {sort}")
+    def analyse(self, protocols: str = None) -> None:
+        """Detecte les attaques dans le trafic"""
+        self.get_all_protocols() #Compte les protocoles présents
+        sort = self.sort_network_protocols() #Triage des protocoles par rapport au nbre de paquets
 
-        self.summary = self._gen_summary()
+        self.attacks = [] #Liste vide pour detections des attaques
+        self._detect_arp() #Utilise detect_arp pour trouver des atatques arp
+        self._detect_scan()
+        self._detect_sql() #Utilise detect_sql pour trouver des attaques sql
+
+        self.summary = self._gen_summary(sort) #Rapport
+
+    def _detect_arp(self) -> None:
+        """Une IP pour deux MAC = spoofing"""
+        table_arp = {} #Dictionnaire pour table ARP
+        for pkt in self.packets:
+            if not (pkt.haslayer(ARP) and pkt[ARP].op == 2): #Si pas de réponse ARP, pkt suivant
+                continue
+            ip, mac = pkt[ARP].psrc, pkt[ARP].hwsrc #Recupè l'ip source et mac source
+            if ip not in table_arp: #si ip nest pas dans la table arp
+                table_arp[ip] = mac #MAC/IP connue
+            elif table_arp[ip] != mac: #IP déjà connue avec une autre addr MAC
+                self.attacks.append({"type": "arp_spoofing", "attacker": mac}) #detection arp spoofing
+
+    def _detect_scan(self) -> None:
+        """Envoie de scan SYN vers trop de ports"""
+        ports_syn = {} #Dictionnaire pour le nombre de port d'un scan SYN
+        for pkt in self.packets: #Parcoure chaque pakets
+            if not (pkt.haslayer(IP) and pkt.haslayer(TCP)): #Si pas IP/TCP, passer au pkt suivant
+                continue
+            flags = int(pkt[TCP].flags) #Recupère les flag TCP du paquet
+            if flags & 0x02 and not flags & 0x10: #Si flag SYN(0x02) et non SYN-ACK(0x10)
+                ports_syn.setdefault(pkt[IP].src, set()).add(pkt[TCP].dport) #Stocke tout les ports pour chaque IP
+
+        for ip, ports in ports_syn.items():
+            if len(ports) > 15: #Si nbre de port >15
+                self.attacks.append({"type": "port_scan", "attacker": ip}) #detection port scan
+
+    def _detect_sql(self) -> None:
+        """Motifs d'injection SQL dans le HTTP et flag cache dedans."""
+        motifs = ["' or ", "or 1=1", "union select", "'--", "' --", "drop table"]
+        for pkt in self.packets:
+            if not (pkt.haslayer(TCP) and pkt.haslayer(Raw) and pkt[TCP].dport == 80):
+                continue
+            brut = pkt[Raw].load.decode(errors="ignore")
+            data = unquote_plus(brut).lower()
+
+            if self.flag is None:
+                trouve = re.search(r"ESGI\{[^}]*\}", brut)
+                if trouve:
+                    self.flag = trouve.group()
+
+            if any(m in data for m in motifs):
+                self.attacks.append({"type": "sql_injection", "attacker": pkt[IP].src})
+
+
+
+
+    def _gen_summary(self, sort) -> str:
+        """Résumé des attaques"""
+        resume = f"Protocoles : {sort}\n"
+        if self.attacks:
+            resume += f"{len(self.attacks)} attaque detecte\n"
+            for a in self.attacks:
+                logger.warning(f"{a['type']} - attaquant : {a['attacker']}")
+                resume += f"- {a['type']} | {a['attacker']}\n"
+        else:
+            logger.info("Aucune attaque detectee")
+            resume += "Aucune attaque trouvée\n"
+        if self.flag:
+            resume += f"Flag : {self.flag}\n"
+        return resume
+
 
     def get_summary(self) -> str:
-        """
-        Return summary
-        :return:
-        """
+        """Retourne le resume de l'analyse"""
         return self.summary
-
-    def _gen_summary(self) -> str:
-        """
-        Generate summary
-        """
-        summary = ""
-        return summary
