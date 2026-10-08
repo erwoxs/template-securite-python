@@ -82,8 +82,10 @@ class Capture:
             ip, mac = pkt[ARP].psrc, pkt[ARP].hwsrc #Recupè l'ip source et mac source
             if ip not in table_arp: #si ip nest pas dans la table arp
                 table_arp[ip] = mac #MAC/IP connue
-            elif table_arp[ip] != mac: #IP déjà connue avec une autre addr MAC
-                self.attacks.append({"type": "arp_spoofing", "attacker": mac}) #detection arp spoofing
+            elif table_arp[ip] != mac:  # IP déjà connue avec une autre addr MAC
+                attaque = {"type": "arp_spoofing", "attacker": mac}
+                if attaque not in self.attacks:  #Supprime les doublons
+                    self.attacks.append(attaque)
 
     def _detect_scan(self) -> None:
         """Envoie de scan SYN vers trop de ports"""
@@ -100,30 +102,32 @@ class Capture:
                 self.attacks.append({"type": "port_scan", "attacker": ip}) #detection port scan
 
     def _detect_sql(self) -> None:
-        """Motifs d'injection SQL dans le HTTP et flag cache dedans."""
-        motifs = ["' or ", "or 1=1", "union select", "'--", "' --", "drop table"]
+        """Motifs d'injection SQL dans le HTTP et flag cacher"""
+        motifs = ["' or ", "or 1=1", "union select", "'--", "' --", "drop table"] #Pattern sql suspect
         for pkt in self.packets:
-            if not (pkt.haslayer(TCP) and pkt.haslayer(Raw) and pkt[TCP].dport == 80):
+            if not (pkt.haslayer(TCP) and pkt.haslayer(Raw) and pkt[TCP].dport == 80): #Si pas de pkt TCP/80 suivant
                 continue
-            brut = pkt[Raw].load.decode(errors="ignore")
-            data = unquote_plus(brut).lower()
+            brut = pkt[Raw].load.decode(errors="ignore") #Recupère requete http du paquet
+            data = unquote_plus(brut).lower() #Décode l'url pour chercher une injection sql encoder
 
             if self.flag is None:
-                trouve = re.search(r"ESGI\{[^}]*\}", brut)
+                trouve = re.search(r"ESGI\{[^}]*\}", brut) #cherche le flag
                 if trouve:
-                    self.flag = trouve.group()
+                    self.flag = trouve.group() #si flag trouver
 
             if any(m in data for m in motifs):
-                self.attacks.append({"type": "sql_injection", "attacker": pkt[IP].src})
+                attaque = {"type": "sql_injection", "attacker": pkt[IP].src}
+                if attaque not in self.attacks:
+                    self.attacks.append(attaque)
 
 
 
 
     def _gen_summary(self, sort) -> str:
         """Résumé des attaques"""
-        resume = f"Protocoles : {sort}\n"
+        resume = f"Protocoles : {sort}\n"  #Recupère les protocoles trié
         if self.attacks:
-            resume += f"{len(self.attacks)} attaque detecte\n"
+            resume += f"{len(self.attacks)} attaque detecte\n" #Ajoute une ligne par attaque
             for a in self.attacks:
                 logger.warning(f"{a['type']} - attaquant : {a['attacker']}")
                 resume += f"- {a['type']} | {a['attacker']}\n"
