@@ -17,6 +17,20 @@ def main():
     protocols = capture.get_all_protocols()
 
     report = Report(protocols, "report.pdf")
+    def _gen_summary(self, sort) -> str:
+        """Résumé des attaques"""
+        resume = f"Protocoles : {sort}\n"  #Recupère les protocoles trié
+        if self.attacks:
+            resume += f"{len(self.attacks)} attaque detecte\n"
+            for a in self.attacks:
+                logger.warning(f"{a['type']} - attaquant : {a['attacker']}")
+                resume += f"- {a['type']} | {a['attacker']}\n"
+        else:
+            logger.info("Aucune attaque detectee")
+            resume += "Aucune attaque trouvée\n"
+        if self.flag:
+            resume += f"Flag : {self.flag}\n"
+        return resume
     report.generate("array")
     #report.save_json("report.json")
     report.generate("graph")
