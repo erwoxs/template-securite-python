@@ -81,6 +81,20 @@ def test_analyse():
     mock_gen_summary.assert_called_once()
     assert capture.summary == "Test summary"
 
+def test_detect_arp():
+    capture = Capture()
+    capture.attacks = []
+    capture.packets = [
+        Ether() / ARP(op=2, psrc="192.168.1.1", hwsrc="aa:aa:aa:aa:aa:aa"),
+        Ether() / ARP(op=2, psrc="192.168.1.1", hwsrc="bb:bb:bb:bb:bb:bb"),
+]
+    # When
+    capture._detect_arp()
+
+    # Then
+    assert {"type": "arp_spoofing", "attacker": "bb:bb:bb:bb:bb:bb"} in capture.attacks
+
+
 
 def test_get_summary():
     # Given
@@ -97,9 +111,8 @@ def test_get_summary():
 def test_gen_summary():
     # Given
     capture = Capture()
-
+    capture.attacks = []
     # When
-    result = capture._gen_summary()
-
+    result = capture._gen_summary([("TCP", 95)])
     # Then
-    assert result == ""  # Method currently returns empty string
+    assert "Aucune attaque" in result
