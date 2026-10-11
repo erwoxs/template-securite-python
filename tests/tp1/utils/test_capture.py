@@ -1,7 +1,7 @@
 from collections import Counter
 from unittest.mock import patch
 from tp1.utils.capture import Capture
-from scapy.all import TCP,UDP,ARP, Ether, IP
+from scapy.all import TCP,UDP,ARP, Ether, IP, Raw
 from scapy.layers.dns import  DNS
 from scapy.layers.inet import ICMP
 
@@ -94,6 +94,34 @@ def test_detect_arp():
     # Then
     assert {"type": "arp_spoofing", "attacker": "bb:bb:bb:bb:bb:bb"} in capture.attacks
 
+
+def test_detect_scan():
+    # Given : une IP qui envoie des SYN vers 20 ports differents
+    capture = Capture()
+    capture.attacks = []
+    capture.packets = [
+        IP(src="10.0.0.5") / TCP(dport=port, flags="S")
+        for port in range(1, 21)
+    ]
+
+    # When
+    capture._detect_scan()
+
+    # Then
+    assert {"type": "port_scan", "attacker": "10.0.0.5"} in capture.attacks
+
+def test_detect_sql():
+    # Given : une requete HTTP contenant une injection SQL
+    capture = Capture()
+    capture.attacks = []
+    capture.packets = [
+        IP(src="10.0.0.9") / TCP(dport=80) / Raw(load=b"GET /login?user=admin' or 1=1 HTTP/1.1")
+    ]
+    # When
+    capture._detect_sql()
+
+    # Then
+    assert {"type": "sql_injection", "attacker": "10.0.0.9"} in capture.attacks
 
 
 def test_get_summary():
