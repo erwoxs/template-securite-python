@@ -1,29 +1,9 @@
-# Template code Sécurité Python
+# TP1 - IDS/IPS
 
-## Description
-
-Projet contenant les modèles de TP pour le cours de sécurité Python de 4e année de l'ESGI.
-
-## Installation
-
-Faire un fork puis un clone du projet :
-
-```bash
-git clone git@github.com:<VotreNom>/template-securite-python.git
-```
-
-Installer les dépendances :
-
-```bash
-cd template-securite-python
-poetry lock
+## Lancement avec poetry
 poetry install
-```
+poetry run tp1 --pcap capture.pcap --out report.json
 
-## Utilisation
-
-Lancer le projet :
-
-```bash
-poetry run tp1
-```
+## Objectif de cet outil
+Analyse un PCAP, compte les protocoles, détecte ARP spoofing,
+scan de ports et injection SQL, et génère un report.json + un PDF et une vue graphique
