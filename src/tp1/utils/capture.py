@@ -110,15 +110,15 @@ class Capture:
             brut = pkt[Raw].load.decode(errors="ignore") #Recupère requete http du paquet
             data = unquote_plus(brut).lower() #Décode l'url pour chercher une injection sql encoder
 
-            if self.flag is None:
-                trouve = re.search(r"ESGI\{[^}]*\}", brut) #cherche le flag
-                if trouve:
-                    self.flag = trouve.group() #si flag trouver
-
             if any(m in data for m in motifs):
                 attaque = {"type": "sql_injection", "attacker": pkt[IP].src}
                 if attaque not in self.attacks:
                     self.attacks.append(attaque)
+                # le flag est dans larequête d'injection
+                if self.flag is None:
+                    trouve = re.search(r"ESGI\{[^}]*\}", brut)
+                    if trouve:
+                        self.flag = trouve.group()
 
 
 
