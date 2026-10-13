@@ -74,18 +74,21 @@ class Capture:
         self.summary = self._gen_summary(sort) #Rapport
 
     def _detect_arp(self) -> None:
-        """Une IP pour deux MAC = spoofing"""
-        table_arp = {} #Dictionnaire pour table ARP
+        """Une IP annoncee par plusieurs MAC = spoofing"""
+        annonces = {}  #Pour chaque IP on compte les MAC données
         for pkt in self.packets:
-            if not (pkt.haslayer(ARP) and pkt[ARP].op == 2): #Si pas de réponse ARP, pkt suivant
+            if not (pkt.haslayer(ARP) and pkt[ARP].op == 2): #Garde uniquement les réponses ARP (2)
                 continue
-            ip, mac = pkt[ARP].psrc, pkt[ARP].hwsrc #Recupè l'ip source et mac source
-            if ip not in table_arp: #si ip nest pas dans la table arp
-                table_arp[ip] = mac #MAC/IP connue
-            elif table_arp[ip] != mac:  # IP déjà connue avec une autre addr MAC
-                attaque = {"type": "arp_spoofing", "attacker": mac}
-                if attaque not in self.attacks:  #Supprime les doublons
-                    self.attacks.append(attaque)
+            ip, mac = pkt[ARP].psrc, pkt[ARP].hwsrc #IP annoncée et MAC qui l'annonce
+            annonces.setdefault(ip, Counter())[mac] += 1 #Ajoute IP/mAC
+
+        for ip, macs in annonces.items():
+            if len(macs) < 2:
+                continue
+            attaquant = macs.most_common(1)[0][0] #L'attaquant est celui qui annonce le plus d'IP/MAC
+            attaque = {"type": "arp_spoofing", "attacker": attaquant}
+            if attaque not in self.attacks: #evite les doublons
+                self.attacks.append(attaque)
 
     def _detect_scan(self) -> None:
         """Envoie de scan SYN vers trop de ports"""
