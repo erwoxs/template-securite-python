@@ -1,4 +1,5 @@
 import argparse
+
 from tp1.utils.capture import Capture
 from tp1.utils.config import logger
 from tp1.utils.report import Report

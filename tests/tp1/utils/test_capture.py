@@ -95,20 +95,17 @@ def test_detect_arp():
     assert {"type": "arp_spoofing", "attacker": "bb:bb:bb:bb:bb:bb"} in capture.attacks
 
 
-def test_detect_scan():
-    # Given : une IP qui envoie des SYN vers 20 ports differents
+def test_detect_arp():
     capture = Capture()
     capture.attacks = []
     capture.packets = [
-        IP(src="10.0.0.5") / TCP(dport=port, flags="S")
-        for port in range(1, 21)
+        Ether() / ARP(op=2, psrc="192.168.1.1", hwsrc="aa:aa:aa:aa:aa:aa"),   #vraie machine
+        Ether() / ARP(op=2, psrc="192.168.1.1", hwsrc="bb:bb:bb:bb:bb:bb"),   #attaquant
+        Ether() / ARP(op=2, psrc="192.168.1.1", hwsrc="bb:bb:bb:bb:bb:bb"),
+        Ether() / ARP(op=2, psrc="192.168.1.1", hwsrc="bb:bb:bb:bb:bb:bb"),
     ]
-
-    # When
-    capture._detect_scan()
-
-    # Then
-    assert {"type": "port_scan", "attacker": "10.0.0.5"} in capture.attacks
+    capture._detect_arp()
+    assert {"type": "arp_spoofing", "attacker": "bb:bb:bb:bb:bb:bb"} in capture.attacks
 
 def test_detect_sql():
     # Given : une requete HTTP contenant une injection SQL

@@ -1,5 +1,6 @@
 from scapy.all import *
 
+
 def hello_world() -> str:
     """
     Hello world function

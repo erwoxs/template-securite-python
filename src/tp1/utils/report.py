@@ -1,6 +1,8 @@
 import json
+
 import pygal
 from fpdf import FPDF
+
 
 class Report:
     def __init__(self, protocols: dict, filename: str, attacks: list = None, flag: str = ""):
