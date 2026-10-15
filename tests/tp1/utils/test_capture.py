@@ -20,8 +20,8 @@ def test_capture_traffic():
     capture = Capture()
     f_paquets = [Ether() / IP() / TCP()]
 
-    # When : on remplace sniff par un faux qui renvoie nos paquets
-    with patch("tp1.utils.capture.sniff", return_value=f_paquet) as mock_sniff:
+    # When  remplace sniff par un faux qui renvoie des paquets
+    with patch("tp1.utils.capture.sniff", return_value=f_paquets) as mock_sniff:
         capture.capture_traffic(pcap="fichier.pcap")
 
     # Then
