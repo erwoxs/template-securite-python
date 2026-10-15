@@ -15,6 +15,20 @@ def test_capture_init():
     assert capture.protocols == Counter()
 
 
+def test_capture_traffic():
+    # Given
+    capture = Capture()
+    f_paquets = [Ether() / IP() / TCP()]
+
+    # When : on remplace sniff par un faux qui renvoie nos paquets
+    with patch("tp1.utils.capture.sniff", return_value=f_paquet) as mock_sniff:
+        capture.capture_traffic(pcap="fichier.pcap")
+
+    # Then
+    assert capture.packets == f_paquets
+    mock_sniff.assert_called_once()
+
+
 """def test_given_capture_when_capture_traffic_then_interface_is_set():
     # Given
     capture = Capture()
