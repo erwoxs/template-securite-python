@@ -6,6 +6,9 @@ class YaraScanner:
 
     def scan(self, data: bytes) -> list[str]:
         """Noms des règles YARA déclenchées."""
-        rules = yara.compile(self.rules_path)
-        matches = rules.match(data=data)
-        return [m.rule for m in matches]
+        try:
+            rules = yara.compile(self.rules_path)
+            matches = rules.match(data=data)
+            return [m.rule for m in matches]
+        except Exception:
+            return []
