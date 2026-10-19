@@ -44,3 +44,16 @@ def test_parse_binary(tmp_path):
 
     #Then
     assert result == {"imports": [], "sections": []}
+
+
+def test_shannon_entropy(tmp_path):
+    #Given
+    fichier = tmp_path / "repete.bin"
+    fichier.write_bytes(b"aaaaaaaaaa")
+    sample = Sample(str(fichier))
+
+    #When
+    entropy = sample.shannon_entropy()
+
+    #Then
+    assert entropy == 0.0
