@@ -2,6 +2,8 @@ import math
 from collections import Counter
 import hashlib
 import magic
+import re
+import lief
 
 class Sample:
     def __init__(self, path: str) -> None:
@@ -30,8 +32,26 @@ class Sample:
 
     def extract_iocs(self) -> dict:
         """domaines, ips, urls, mutex, registry (regex sur les strings)."""
-        raise NotImplementedError
+        strings = re.findall(rb"[\x20-\x7e]{4,}", self.data)
+        text = b" ".join(strings).decode(errors="ignore")
+
+        return {
+            "domains": re.findall(r"\b(?:[a-z0-9-]+\.)+[a-z]{2,}\b", text, re.I), #regex pour nom de domaine
+            "ips": re.findall(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", text),
+            "urls": re.findall(r"https?://[^\s\"']+", text),
+            "mutex": re.findall(r"(?:Global|Local)\\[A-Za-z0-9_.-]+", text),
+            "registry": re.findall(r"HK(?:LM|CU|CR|U|CC)\\[A-Za-z0-9\\_.-]+", text), #regex pour clé de registre
+        }
 
     def parse_binary(self) -> dict:
         """imports / sections via lief (si PE/ELF)."""
-        raise NotImplementedError
+        binary = lief.parse(self.path) #import lief lit le binaire
+        if binary is None: #si lief ne parse rien, retourne des listes vides
+            return {"imports": [], "sections": []}
+
+        imports = [f.name for f in binary.imported_functions] #parcours chaque fonctions du binaire
+        sections = [s.name for s in binary.sections] #parcours chaque sections du binaire
+
+        return {"imports": imports, "sections": sections}
+
+
