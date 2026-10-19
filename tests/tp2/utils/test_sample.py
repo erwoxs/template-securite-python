@@ -32,3 +32,15 @@ def test_extract_iocs(tmp_path):
     assert "c2.evil.test" in iocs["domains"]
     assert "185.10.20.30" in iocs["ips"]
     assert "http://evil.test/x.php" in iocs["urls"]
+
+def test_parse_binary(tmp_path):
+    #Given
+    fichier = tmp_path / "pas_un_binaire.txt"
+    fichier.write_bytes(b"text, unknow binary")
+    sample = Sample(str(fichier))
+
+    #When
+    result = sample.parse_binary()
+
+    #Then
+    assert result == {"imports": [], "sections": []}
