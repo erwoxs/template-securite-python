@@ -1,5 +1,8 @@
 import json
+
 from fpdf import FPDF
+
+
 class Report:
     def __init__(self, result: dict) -> None:
         self.result = result
