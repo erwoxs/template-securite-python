@@ -1,14 +1,17 @@
-import math
-from collections import Counter
 import hashlib
-import magic
+import math
 import re
+from collections import Counter
+
 import lief
+import magic
+
 
 class Sample:
     def __init__(self, path: str) -> None:
         self.path = path
-        self.data = open(path, "rb").read()
+        with open(path, "rb") as f:
+            self.data = f.read()
 
     def get_file_metadata(self) -> dict:
         """sha256, md5, taille, type de fichier, entropie de Shannon."""
@@ -20,6 +23,7 @@ class Sample:
           "entropy": round(self.shannon_entropy(), 2),
         }
         return metadata
+
 
 
 
@@ -36,7 +40,7 @@ class Sample:
         text = b" ".join(strings).decode(errors="ignore")
 
         return {
-            "domains": re.findall(r"\b(?:[a-z0-9-]+\.)+[a-z]{2,}\b", text, re.I), #regex pour nom de domaine
+            "domains": re.findall(r"\b(?:[a-z0-9-]+\.)+[a-z]{2,}\b", text, re.IGNORECASE), #regex pour nom de domaine
             "ips": re.findall(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", text),
             "urls": re.findall(r"https?://[^\s\"']+", text),
             "mutex": re.findall(r"(?:Global|Local)\\[A-Za-z0-9_.-]+", text),
@@ -53,5 +57,15 @@ class Sample:
         sections = [s.name for s in binary.sections] #parcours chaque sections du binaire
 
         return {"imports": imports, "sections": sections}
+
+    def extract_flag(self) -> str:
+        """Retrouve le vrai flag dans les samples"""
+        text = self.data.decode(errors="ignore")
+
+        for m in re.finditer(r"ESGI\{[^}]*\}", text): #cherche tout les flags ESGI
+            avant = text[max(0, m.start() - 10):m.start()]
+            if "FLAG=" in avant:
+                return m.group()
+        return ""
 
 
