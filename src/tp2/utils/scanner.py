@@ -1,5 +1,6 @@
 import yara
 
+
 class YaraScanner:
     def __init__(self, rules_path: str = "rules/rules.yar") -> None:
         self.rules_path = rules_path
@@ -10,5 +11,5 @@ class YaraScanner:
             rules = yara.compile(self.rules_path)
             matches = rules.match(data=data)
             return [m.rule for m in matches]
-        except Exception:
+        except yara.Error:
             return []
