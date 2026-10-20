@@ -5,7 +5,7 @@ from fpdf import FPDF
 
 
 class Report:
-    def __init__(self, protocols: dict, filename: str, attacks: list = None, flag: str = ""):
+    def __init__(self, protocols: dict, filename: str, attacks: list | None = None, flag: str = ""):
         self.protocols = protocols
         self.filename = filename
         self.title = "Rapport d'analyse reseau - TP1"
