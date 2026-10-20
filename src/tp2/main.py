@@ -16,7 +16,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True) #Crée un dossier si n'existe pas déjà
 
     for sample_path in Path(args.samples).iterdir():
-        if not sample_path.is_file(): #Parcours chaque élément du dossier, s'il s'agit d'un fichier ounon
+        if not sample_path.is_file() or sample_path.suffix == ".txt": #Parcours chaque élément du dossier, s'il s'agit d'un fichier ounon
             continue
 
         triage = Triage(str(sample_path), args.llm)
