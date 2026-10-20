@@ -1,7 +1,8 @@
 import argparse
+from pathlib import Path
+
 from tp2.utils.report import Report
 from tp2.utils.triage import Triage
-from pathlib import Path
 
 
 def main() -> None:
