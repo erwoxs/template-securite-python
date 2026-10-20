@@ -1,4 +1,3 @@
-import yara
 from tp2.utils.scanner import YaraScanner
 
 
