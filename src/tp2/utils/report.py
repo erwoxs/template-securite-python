@@ -8,7 +8,7 @@ class Report:
         """Rapport PDF lisible (fpdf2)."""
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=12)
+        pdf.set_font("Helvetica", size=12)
 
         for cle, valeur in self.result.items():
             ligne = f"{cle} : {valeur}"
