@@ -1,5 +1,5 @@
 from tp2.utils.sample import Sample
-
+import re
 
 def test_get_file_metadata(tmp_path):
     #Given
@@ -57,3 +57,13 @@ def test_shannon_entropy(tmp_path):
 
     #Then
     assert entropy == 0.0
+
+def extract_flag(self) -> str:
+    """Retrouve le vrai flag dans les samples"""
+    text = self.data.decode(errors="ignore")
+
+    for m in re.finditer(r"ESGI\{[^}]*\}", text):
+        avant = text[max(0, m.start() - 10):m.start()]
+        if "FLAG=" in avant:
+            return m.group()
+    return ""
