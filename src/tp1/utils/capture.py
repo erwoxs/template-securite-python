@@ -63,7 +63,7 @@ class Capture:
         logger.info(f"Protocoles capturés: {protocols}")
         return protocols
 
-    def analyse(self, protocols: str = None) -> None:
+    def analyse(self, protocols: str | None = None) -> None:
         """Detecte les attaques dans le trafic"""
         self.get_all_protocols() #Compte les protocoles présents
         sort = self.sort_network_protocols() #Triage des protocoles par rapport au nbre de paquets
