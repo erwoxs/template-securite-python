@@ -1,8 +1,8 @@
+
 from tp2.utils.config import logger
-from tp2.utils.llm import LLMTriage
 from tp2.utils.sample import Sample
 from tp2.utils.scanner import YaraScanner
-import json
+
 
 class Triage:
     def __init__(self, path: str, backend: str) -> None:
@@ -35,5 +35,5 @@ class Triage:
             "mitre_attack": [],
             "llm_summary": "",
             "score": 0,
-            "flag": "",
+            "flag": sample.extract_flag(),
         }
