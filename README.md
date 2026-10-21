@@ -35,3 +35,21 @@ poetry run tp2 --samples DOSSIER --rules DOSSIER --out DOSSIER
 - YARA : règles fournies et règles personnalisées
 - LLM : verdict (famille, capacités, score) à partir d'un résumé
 - Rapport : fichier JSON et PDF par échantillon
+
+# TP3 - Breach the target
+
+## Description
+Exploit automatise qui enchaine une phase web (fuzzing d'endpoint + resolution
+de CAPTCHA par OCR) et une phase reseau (decodage base64 + XOR chronometre)
+pour recuperer deux drapeaux sur une cible.
+
+## Installation
+poetry install
+
+## Utilisation
+poetry run tp3 --target http://localhost:8080
+
+## Fonctionnement
+- Phase web : trouve la page cachee, casse le CAPTCHA, recupere flag1 + host/port/cle
+- Phase reseau : se connecte au service TCP, decode les jetons sous 5s par round
+- Affiche les deux drapeaux (FLAG1 et FLAG_FINAL)
