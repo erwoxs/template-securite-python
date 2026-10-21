@@ -35,6 +35,6 @@ class Triage:
             "family_guess": verdict.get("famille", ""),
             "mitre_attack": [],
             "llm_summary": json.dumps(verdict),
-            "score": verdict.get("score_0_10", 0),
+             "score": verdict.get("score_0_10", 0),
             "flag": sample.extract_flag(),
         }
