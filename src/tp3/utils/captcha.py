@@ -1,8 +1,14 @@
+import io
+import pytesseract
+from PIL import Image
+
+
 class Captcha:
-    def __init__(self, url):
-        self.url = url
-        self.image = ""
-        self.value = ""
+    def __init__(self, session, base_url):
+        self.session = session       #session
+        self.base_url = base_url  #adresse du site/docker
+        self.image = None #contiendra l'image
+        self.value = "" #contiendra le texte extrait du captcha
 
     def solve(self):
         """
@@ -14,6 +20,9 @@ class Captcha:
         """
         Fonction permettant la capture du captcha.
         """
+        """Télécharge l'image du captcha."""
+        r = self.session.get(f"{self.base_url}/captcha.png") #tTélécharge l'image avec un cookie de session
+        self.image = Image.open(io.BytesIO(r.content))
 
     def get_value(self):
         """
