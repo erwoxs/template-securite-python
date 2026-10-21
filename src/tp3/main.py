@@ -7,8 +7,22 @@ chronométré). Voir tp3-breach-the-target.md.
 """
 
 import argparse
-
 from tp3.utils.config import logger
+import requests
+from pathlib import Path
+
+
+def fuzz_endpoint(target: str) -> str:
+    """Test de la wordlist"""
+    wordlist = Path(__file__).parent / "wordlist.txt"
+    for ligne in wordlist.read_text().splitlines():
+        mot = ligne.strip()
+        if not mot:
+            continue
+        r = requests.get(f"{target}/{mot}")
+        if r.status_code != 404:
+            return mot
+    return ""
 
 
 def breach_web(target: str) -> tuple[str, int, bytes]:
