@@ -2,14 +2,15 @@
 from tp2.utils.config import logger
 from tp2.utils.sample import Sample
 from tp2.utils.scanner import YaraScanner
-
+from tp2.utils.llm import LLMTriage
+import json
 
 class Triage:
     def __init__(self, path: str, backend: str) -> None:
         self.path = path
         self.backend = backend
         self.scanner = YaraScanner()
-        #self.llm = LLMTriage(backend)
+        self.llm = LLMTriage(backend)
 
     def run(self) -> dict:
         sample = Sample(self.path)
@@ -19,8 +20,8 @@ class Triage:
         iocs = sample.extract_iocs()
         bininfo = sample.parse_binary()
         matches = self.scanner.scan(sample.data)
-        #summary = json.dumps({"meta": meta, "iocs": iocs, "yara": matches, "bin": bininfo})
-        #verdict = self.llm.triage(summary)
+        summary = json.dumps({"meta": meta, "iocs": iocs, "yara": matches, "bin": bininfo})
+        verdict = self.llm.triage(summary)
 
         return {
             "sha256": meta["sha256"],
@@ -31,9 +32,9 @@ class Triage:
             "iocs": iocs,
             "imports": bininfo["imports"],
             "yara_matches": matches,
-            "family_guess": "",
+            "family_guess": verdict.get("famille", ""),
             "mitre_attack": [],
-            "llm_summary": "",
-            "score": 0,
+            "llm_summary": json.dumps(verdict),
+            "score": verdict.get("score_0_10", 0),
             "flag": sample.extract_flag(),
         }
