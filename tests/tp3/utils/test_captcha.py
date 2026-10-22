@@ -3,28 +3,15 @@ from unittest.mock import MagicMock
 from PIL import Image
 from tp3.utils.captcha import Captcha
 
+
 def test_captcha_init():
-    # Given
-    url = "http://example.com/captcha"
+    #Given / When
+    captcha = Captcha(None, "http://test")
 
-    # When
-    captcha = Captcha(url)
-
-    # Then
-    assert captcha.url == url
-    assert captcha.image == ""
+    #Then
+    assert captcha.base_url == "http://test"
+    assert captcha.image is None
     assert captcha.value == ""
-
-
-def test_solve():
-    # Given
-    captcha = Captcha("http://example.com/captcha")
-
-    # When
-    captcha.solve()
-
-    # Then
-    assert captcha.value == "FIXME"
 
 
 def test_capture():
@@ -45,14 +32,15 @@ def test_capture():
     assert captcha.image is not None
     assert captcha.image.size == (220, 90)
 
-
 def test_get_value():
-    # Given
-    captcha = Captcha("http://example.com/captcha")
-    captcha.value = "TEST123"
+    #Given
+    captcha = Captcha(None, "http://test")
+    captcha.value = "ABC12"
 
-    # When
+    #When
     result = captcha.get_value()
 
-    # Then
-    assert result == "TEST123"
+    #Then
+    assert result == "ABC12"
+
+
