@@ -1,7 +1,9 @@
 from unittest.mock import patch, MagicMock
 from tp3.main import fuzz_endpoint
 from tp3.main import breach_web
-from tp3.main import  breach_network
+from tp3.main import breach_network, xor_bytes
+import base64
+
 
 def test_fuzz_endpoint():
     #Given
@@ -33,3 +35,38 @@ def test_breach_web():
     assert host == "127.0.0.1"
     assert port == 9090
     assert key == bytes.fromhex("ff00")
+
+
+def test_breach_network():
+    #Given
+    key = b"\xff\x19\x3b\x22"
+    token = b"abcd1234abcd1234"
+
+    faux_conn = MagicMock()
+    #le serveur envoie 3 rounds encodes suivi du le flag
+    ligne_encodee = base64.b64encode(xor_bytes(token, key))
+    faux_conn.recvline.side_effect = [
+        b"intro\n",
+        ligne_encodee, ligne_encodee, ligne_encodee,
+        b"OK ESGI{chain_test}\n",
+    ]
+
+    #When
+    with patch("tp3.main.remote", return_value=faux_conn):
+        flag = breach_network("127.0.0.1", 9090, key)
+
+    #Then
+    assert flag == "ESGI{chain_test}"
+
+def test_xor_bytes():
+    #Given
+    data = b"hello"
+    key = b"\xff\x19\x3b\x22"
+
+    #When
+    encode = xor_bytes(data, key) #xor deux fois avec la meme key
+    decode = xor_bytes(encode, key)
+
+    #Then
+    assert decode == data
+    assert encode != data
