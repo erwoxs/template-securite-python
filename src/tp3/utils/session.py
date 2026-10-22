@@ -38,14 +38,13 @@ class Session:
         self.captcha_value = captcha.get_value() #stocke la valeur du captcha
 
     def submit_request(self):
-        """
-        Sends the flag and captcha.
-        """
+        """Soumet le captcha et recupere la reponse JSON."""
+        r = self.session.post(self.url, data={"captcha": self.captcha_value}) #envoie une post request avec le code
+        self.result = r.json() #stocke la réponse du serveur en json
 
     def process_response(self):
-        """
-        Processes the response.
-        """
+        """Extrait flag1 de la reponse."""
+        self.valid_flag = self.result.get("flag1", "") #recupère le flag dans la réponse json
 
     def get_flag(self):
         """
