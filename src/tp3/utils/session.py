@@ -1,5 +1,5 @@
-from src.tp3.utils.captcha import Captcha
-
+import requests
+from tp3.utils.captcha import Captcha
 
 class Session:
     """
@@ -20,20 +20,22 @@ class Session:
             url (str): The URL of the captcha.
         """
         self.url = url
+        self.session = requests.Session() #stocke le cookie de session
         self.captcha_value = ""
         self.flag_value = ""
         self.valid_flag = ""
+        self.result = {}
 
     def prepare_request(self):
         """
         Prepares the request for sending by capturing and solving the captcha.
         """
-        captcha = Captcha(self.url)
+        self.session.get(self.url) #visite la page cachée
+        base = self.url.rsplit("/", 1)[0] #retire le endpoint de l'url
+        captcha = Captcha(self.session, base) #crée le captcha et recupère le cookie de session
         captcha.capture()
         captcha.solve()
-
-        self.captcha_value = captcha.get_value()
-        self.flag_value = "FIXME"
+        self.captcha_value = captcha.get_value() #stocke la valeur du captcha
 
     def submit_request(self):
         """
