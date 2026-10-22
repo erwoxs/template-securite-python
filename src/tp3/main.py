@@ -44,13 +44,28 @@ def breach_web(target: str) -> tuple[str, int, bytes]:
     key = bytes.fromhex(result["key"])
     return host, port, key
 
+def xor_bytes(data: bytes, key: bytes) -> bytes:
+    """XOR octet par octet"""
+    return bytes(c ^ key[i % len(key)] for i, c in enumerate(data))
 
 def breach_network(host: str, port: int, key: bytes) -> str:
-    """pwntools/socket : décode le flux base64+XOR en boucle sous 30 s.
+    """Se connecte au service TCP, decode chaque round, retourne le flag final."""
+    conn = remote(host, port) #ouvre une connexion tcp
+    conn.recvline()
 
-    Retourne le flag final. Indices : pwn.remote, base64.
-    """
-    raise NotImplementedError
+    for _ in range(3):
+        encode = conn.recvline().strip()
+        brut = base64.b64decode(encode) #decode bas64 pour le XOR
+        token = xor_bytes(brut, key)
+        conn.sendline(token)
+
+    reponse = conn.recvline().decode()
+    conn.close()
+
+    flag = reponse.replace("OK", "").strip()
+    return flag
+
+
 
 
 def main() -> None:
