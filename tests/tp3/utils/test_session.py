@@ -1,5 +1,5 @@
-from src.tp3.utils.session import Session
-
+from tp3.utils.session import Session
+from unittest.mock import patch, MagicMock
 
 def test_session_init():
     # Given
@@ -49,3 +49,16 @@ def test_get_flag():
 
     # Then
     assert result == "FLAG123"
+
+def test_prepare_request():
+    #Given
+    session = Session("http://test/internal-panel")
+
+    #When
+    with patch.object(session.session, "get"), \
+         patch("tp3.utils.session.Captcha") as faux_captcha:
+        faux_captcha.return_value.get_value.return_value = "ABC12"
+        session.prepare_request()
+
+    #Then
+    assert session.captcha_value == "ABC12"
