@@ -4,6 +4,7 @@ from PIL import Image
 from tp3.utils.captcha import Captcha
 from unittest.mock import patch
 
+
 def test_captcha_init():
     #Given / When
     captcha = Captcha(None, "http://test")
