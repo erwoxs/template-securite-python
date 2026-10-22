@@ -1,9 +1,11 @@
 
+import json
+
 from tp2.utils.config import logger
+from tp2.utils.llm import LLMTriage
 from tp2.utils.sample import Sample
 from tp2.utils.scanner import YaraScanner
-from tp2.utils.llm import LLMTriage
-import json
+
 
 class Triage:
     def __init__(self, path: str, backend: str) -> None:
