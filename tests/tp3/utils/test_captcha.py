@@ -2,7 +2,7 @@ import io
 from unittest.mock import MagicMock
 from PIL import Image
 from tp3.utils.captcha import Captcha
-
+from unittest.mock import patch
 
 def test_captcha_init():
     #Given / When
@@ -43,4 +43,15 @@ def test_get_value():
     #Then
     assert result == "ABC12"
 
+
+def test_solve():
+    captcha = Captcha(None, "http://test")
+    captcha.image = "fausse_image"   # solve ne lit pas l'OCR est mocké
+
+    #When
+    with patch("tp3.utils.captcha.pytesseract.image_to_string", return_value="ABC12\n"):
+        captcha.solve()
+
+    #Then
+    assert captcha.value == "ABC12"
 
