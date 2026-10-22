@@ -1,6 +1,8 @@
 import json
 import os
+
 import requests
+
 from tp2.utils.config import logger
 
 SYSTEM_PROMPT = (
