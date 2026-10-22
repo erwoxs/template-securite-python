@@ -14,41 +14,28 @@ def test_session_init():
     assert session.flag_value == ""
     assert session.valid_flag == ""
 
-
-def test_submit_request():
-    # Given
-    session = Session("http://example.com/captcha")
-
-    # When
-    session.submit_request()
-
-    # Then
-    # This is a minimal test since the method doesn't do anything yet
-    assert True
-
-
 def test_process_response():
-    # Given
-    session = Session("http://example.com/captcha")
+    #Given
+    session = Session("http://test/internal-panel")
+    session.result = {"flag1": "ESGI{test}"}
 
-    # When
-    result = session.process_response()
+    #When
+    session.process_response()
 
-    # Then
-    # This is a minimal test since the method doesn't do anything yet
-    assert result is None
+    #Then
+    assert session.valid_flag == "ESGI{test}"
 
 
 def test_get_flag():
-    # Given
-    session = Session("http://example.com/captcha")
-    session.valid_flag = "FLAG123"
+    #Given
+    session = Session("http://test/internal-panel")
+    session.valid_flag = "ESGI{test}"
 
-    # When
+    #When
     result = session.get_flag()
 
-    # Then
-    assert result == "FLAG123"
+    #Then
+    assert result == "ESGI{test}"
 
 def test_prepare_request():
     #Given
@@ -62,3 +49,19 @@ def test_prepare_request():
 
     #Then
     assert session.captcha_value == "ABC12"
+
+def test_submit_request():
+    #Given,
+    session = Session("http://test/internal-panel") #session dont le POST renvoie un JSON connu
+    session.captcha_value = "ABC12"
+
+    fausse_reponse = MagicMock()
+    fausse_reponse.json.return_value = {"flag1": "ESGI{test}", "host": "127.0.0.1", "port": 9090, "key": "ff00"}
+    # session dont le POST renvoie un JSON connu
+
+    #When
+    with patch.object(session.session, "post", return_value=fausse_reponse):
+        session.submit_request()
+
+    #Then
+    assert session.result["flag1"] == "ESGI{test}"
