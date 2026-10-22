@@ -8,10 +8,11 @@ chronométré). Voir tp3-breach-the-target.md.
 
 import argparse
 from pathlib import Path
-
 import requests
-
 from tp3.utils.config import logger
+from tp3.utils.session import Session
+import base64
+from pwn import remote
 
 
 def fuzz_endpoint(target: str) -> str:
@@ -28,11 +29,20 @@ def fuzz_endpoint(target: str) -> str:
 
 
 def breach_web(target: str) -> tuple[str, int, bytes]:
-    """Fuzz les endpoints, casse le CAPTCHA, retourne (host, port, key).
+    """Fuzz les endpoints, casse le CAPTCHA, retourne (host, port, key)."""
+    path = fuzz_endpoint(target) #fuzz la cible pour trouver le endpoint
+    session = Session(f"{target}/{path}")
+    session.prepare_request() #recupère le cookie
+    session.submit_request() #recupère le body json
+    session.process_response() #extrait le flag du json
 
-    Affiche aussi Flag 1. Indices : requests, PIL, pytesseract.
-    """
-    raise NotImplementedError
+    logger.info(f"FLAG1: {session.get_flag()}") #affiche le flag recupere
+
+    result = session.result
+    host = result["host"]
+    port = result["port"]
+    key = bytes.fromhex(result["key"])
+    return host, port, key
 
 
 def breach_network(host: str, port: int, key: bytes) -> str:
