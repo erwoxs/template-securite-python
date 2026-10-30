@@ -23,7 +23,6 @@ class Captcha:
         """
         Fonction permettant la capture du captcha.
         """
-        """Télécharge l'image du captcha."""
         r = self.session.get(f"{self.base_url}/captcha.png") #tTélécharge l'image avec un cookie de session
         self.image = Image.open(io.BytesIO(r.content))
 
