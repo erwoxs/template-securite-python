@@ -66,7 +66,7 @@ def test_get_all_protocols():
     # When
     result = capture.get_all_protocols() #Test de la fonction get_all_protocol
     # Then
-    assert result["ETHERNET"] == 5
+    assert result["Ethernet"] == 5
     assert result["IP"] == 4 #résultats attendu du nbre de paquet ip
     assert result["TCP"] == 2 #résultat attendu du nbre de paquets tcp
     assert result["HTTP"] == 1
