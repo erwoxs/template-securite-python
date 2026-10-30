@@ -1,14 +1,21 @@
 import yara
-
+from pathlib import Path
 
 class YaraScanner:
-    def __init__(self, rules_path: str = "rules/rules.yar") -> None:
+    def __init__(self, rules_path: str = "rules") -> None:
         self.rules_path = rules_path
 
     def scan(self, data: bytes) -> list[str]:
         """Noms des règles YARA déclenchées."""
         try:
-            rules = yara.compile(self.rules_path)
+            chemin = Path(self.rules_path)
+            if chemin.is_dir():
+                #charge tous les fichiers .yar du dossier
+                fichiers = {f.stem: str(f) for f in chemin.glob("*.yar")}
+                rules = yara.compile(filepaths=fichiers)
+            else:
+                #un seul fichier de regles
+                rules = yara.compile(str(chemin))
             matches = rules.match(data=data)
             return [m.rule for m in matches]
         except yara.Error:
