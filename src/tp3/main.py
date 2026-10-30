@@ -7,12 +7,14 @@ chronométré). Voir tp3-breach-the-target.md.
 """
 
 import argparse
+import base64
 from pathlib import Path
+
 import requests
+from pwn import remote
+
 from tp3.utils.config import logger
 from tp3.utils.session import Session
-import base64
-from pwn import remote
 
 
 def fuzz_endpoint(target: str) -> str:
