@@ -95,18 +95,6 @@ def test_analyse():
     mock_gen_summary.assert_called_once()
     assert capture.summary == "Test summary"
 
-def test_detect_arp():
-    capture = Capture()
-    capture.attacks = []
-    capture.packets = [
-        Ether() / ARP(op=2, psrc="192.168.1.1", hwsrc="aa:aa:aa:aa:aa:aa"),
-        Ether() / ARP(op=2, psrc="192.168.1.1", hwsrc="bb:bb:bb:bb:bb:bb"),
-]
-    # When
-    capture._detect_arp()
-
-    # Then
-    assert {"type": "arp_spoofing", "attacker": "bb:bb:bb:bb:bb:bb"} in capture.attacks
 
 
 def test_detect_arp():
@@ -120,6 +108,22 @@ def test_detect_arp():
     ]
     capture._detect_arp()
     assert {"type": "arp_spoofing", "attacker": "bb:bb:bb:bb:bb:bb"} in capture.attacks
+
+
+def test_detect_scan():
+    # Given
+    capture = Capture()
+    capture.attacks = []
+    capture.packets = [
+        IP(src="10.0.0.5") / TCP(dport=port, flags="S") #scan plusieurs port différents
+        for port in range(1, 21)
+    ]
+
+    # When
+    capture._detect_scan()
+
+    # Then
+    assert {"type": "port_scan", "attacker": "10.0.0.5"} in capture.attacks
 
 def test_detect_sql():
     # Given : une requete HTTP contenant une injection SQL
