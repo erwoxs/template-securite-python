@@ -44,7 +44,7 @@ class Capture:
         protocols = Counter()
         for pkt in self.packets:
             if pkt.haslayer(Ether):
-                protocols["ETHERNET"] += 1
+                protocols["ETHER"] += 1
             if pkt.haslayer(ARP):
                 protocols["ARP"] += 1
             if pkt.haslayer(IP):
