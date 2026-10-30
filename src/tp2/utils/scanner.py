@@ -1,6 +1,7 @@
 import yara
 from pathlib import Path
 
+
 class YaraScanner:
     def __init__(self, rules_path: str = "rules") -> None:
         self.rules_path = rules_path
@@ -10,11 +11,9 @@ class YaraScanner:
         try:
             chemin = Path(self.rules_path)
             if chemin.is_dir():
-                #charge tous les fichiers .yar du dossier
                 fichiers = {f.stem: str(f) for f in chemin.glob("*.yar")}
                 rules = yara.compile(filepaths=fichiers)
             else:
-                #un seul fichier de regles
                 rules = yara.compile(str(chemin))
             matches = rules.match(data=data)
             return [m.rule for m in matches]
