@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 from tp2.utils.report import Report
 from tp2.utils.triage import Triage
+from tp2.utils.triage import YaraScanner
 
 
 def main() -> None:
@@ -14,12 +15,13 @@ def main() -> None:
 
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True) #Crée un dossier si n'existe pas déjà
+    scanner = YaraScanner(args.rules)
 
     for sample_path in Path(args.samples).iterdir():
         if not sample_path.is_file() or sample_path.suffix == ".txt": #Parcours chaque élément du dossier, s'il s'agit d'un fichier ounon
             continue
 
-        triage = Triage(str(sample_path), args.llm, args.rules)
+        triage = Triage(str(sample_path), args.llm, scanner)
         result = triage.run()
 
         report = Report(result)
