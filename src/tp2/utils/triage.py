@@ -1,6 +1,4 @@
-
 import json
-
 from tp2.utils.config import logger
 from tp2.utils.llm import LLMTriage
 from tp2.utils.sample import Sample
@@ -8,11 +6,12 @@ from tp2.utils.scanner import YaraScanner
 
 
 class Triage:
-    def __init__(self, path: str, backend: str) -> None:
+    def __init__(self, path: str, backend: str, rules_dir: str = "rules") -> None:
         self.path = path
         self.backend = backend
-        self.scanner = YaraScanner()
+        self.scanner = YaraScanner(rules_dir)
         self.llm = LLMTriage(backend)
+
 
     def run(self) -> dict:
         sample = Sample(self.path)
