@@ -1,6 +1,5 @@
 import argparse
 from pathlib import Path
-
 from tp2.utils.report import Report
 from tp2.utils.triage import Triage
 
@@ -20,7 +19,7 @@ def main() -> None:
         if not sample_path.is_file() or sample_path.suffix == ".txt": #Parcours chaque élément du dossier, s'il s'agit d'un fichier ounon
             continue
 
-        triage = Triage(str(sample_path), args.llm)
+        triage = Triage(str(sample_path), args.llm, args.rules)
         result = triage.run()
 
         report = Report(result)

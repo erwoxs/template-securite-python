@@ -1,8 +1,3 @@
-/*
- * Règles YARA d'exemple pour le TP2.
- * Ajoutez-en au moins deux à vous.
- */
-
 rule Suspicious_Downloader
 {
     meta:
