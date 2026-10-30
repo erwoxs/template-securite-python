@@ -1,5 +1,7 @@
 import requests
+
 from tp3.utils.captcha import Captcha
+
 
 class Session:
     """
