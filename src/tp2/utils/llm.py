@@ -21,7 +21,7 @@ class LLMTriage:
         """Demande un verdict au LLM, avec test local si pas de reseau."""
         try:
             return self._call_llm(summary)
-        except Exception as e:
+        except Exception as e: # noqa: BLE001
             logger.warning(f"LLM indisponible ({e}), repli local")
             return self._fallback(summary)
 
